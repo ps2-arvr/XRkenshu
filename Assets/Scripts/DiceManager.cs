@@ -55,6 +55,8 @@ public class DiceManager : MonoBehaviour
         ReadCSV(SettingList);
     }
 
+
+
     // Update is called once per frame
     void Update()
     {
@@ -117,28 +119,9 @@ public class DiceManager : MonoBehaviour
     // 押されたキーによって処理を変える
         if (Input.GetKeyDown(KeyCode.Space))
         {                
-            // タグがTagDiceのものをすべて入れる
-            if (SpinFlag == false)
-            {
-                // 入れられたオブジェクトを全て回転させる
-                foreach(GameObject dice in Dices)
-                {
-                    AllScripts = dice.GetComponent<DicePrefab>();
-                    AllScripts.SpinFlag = true ;
-                    // マネージャのSpinFlagをtrueにする
-                    this.SpinFlag = true;
-                }
-            }else {
-                // 入れられたオブジェクトを全て停止させる
-                foreach(GameObject dice in Dices)
-                {
-                    AllScripts = dice.GetComponent<DicePrefab>();
-                    AllScripts.SpinFlag = false ;
-                    // マネージャのSpinFlagをfalseにする
-                    this.SpinFlag = false;
-                }
-            }
+            AllSpins();
         }
+        
         // Qキー押下でサイコロを初期配置に戻す
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -229,6 +212,8 @@ public class DiceManager : MonoBehaviour
         DiceCopy.transform.localPosition = position;
         DiceCopy.transform.localEulerAngles = Rotation;
     }
+
+    
     // 引数でCSVのファイルパスをもらい、CSVを読み込み、内容をリストに格納してリストを返すメソッド
     List<string[]> ListMakeCSV(string readPath)
     {
@@ -244,5 +229,29 @@ public class DiceManager : MonoBehaviour
             makeList.Add(line.Split(','));
         }
         return makeList;
+    }
+    void AllSpins()
+    {
+        // タグがTagDiceのものをすべて入れる
+        if (SpinFlag == false)
+        {
+            // 入れられたオブジェクトを全て回転させる
+            foreach(GameObject dice in Dices)
+            {
+                AllScripts = dice.GetComponent<DicePrefab>();
+                AllScripts.SpinFlag = true ;
+                // マネージャのSpinFlagをtrueにする
+                this.SpinFlag = true;
+            }
+        }else {
+             // 入れられたオブジェクトを全て停止させる
+            foreach(GameObject dice in Dices)
+            {
+                AllScripts = dice.GetComponent<DicePrefab>();
+                AllScripts.SpinFlag = false ;
+                // マネージャのSpinFlagをfalseにする
+                this.SpinFlag = false;
+            }      
+        }
     }
 }
