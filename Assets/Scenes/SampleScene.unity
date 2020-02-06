@@ -521,7 +521,6 @@ MonoBehaviour:
   GetRayObject: {fileID: 0}
   script: {fileID: 0}
   World: {fileID: 428697882}
-  SettingCSV: 
 --- !u!4 &1725741976
 Transform:
   m_ObjectHideFlags: 0

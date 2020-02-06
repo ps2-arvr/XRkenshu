@@ -9,6 +9,8 @@ public class DiceManager : MonoBehaviour
 {
     // Prefab取得用の変数
     public GameObject DiceCopy ;
+    // 初期の状態のPrefabを保存する変数
+    private GameObject DiceOriginal;
     //　直近でクリックされたオブジェクトを格納する。
     public GameObject GetRayObject;
     public DicePrefab script ;
@@ -45,6 +47,7 @@ public class DiceManager : MonoBehaviour
     
     void Start()
     {   
+        DiceOriginal = DiceCopy;
         if (System.IO.File.Exists(SaveUrl))
         {
             // 前回の保存データが残っている場合削除
@@ -160,7 +163,7 @@ public class DiceManager : MonoBehaviour
             }
         }    
         // DiceCopy内にあるオブジェクト情報を親のPrefabに戻す
-        DiceCopy = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/DicePrefab.prefab") ;
+        DiceCopy = DiceOriginal ;
         Debug.Log(TargetList.Count);
         for (int count = 1 ; count <= (TargetList.Count - 1);count++)
         {
