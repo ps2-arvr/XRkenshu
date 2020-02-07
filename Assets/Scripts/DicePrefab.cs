@@ -10,6 +10,8 @@ public class DicePrefab : MonoBehaviour
     public DiceManager Script;
     // 回転するかしないかを判別するbool型変数.
     public bool SpinFlag = false;
+    //選択されているかされていないかを判別する
+    public bool SelectionNow = false;
 
     // Start is called before the first frame update.
     void Start()
@@ -26,6 +28,23 @@ public class DicePrefab : MonoBehaviour
         this.transform.Rotate(new Vector3(3, 3, 3));
       }else {
         this.transform.Rotate(new Vector3(0, 0, 0));
+      }
+
+      if (SelectionNow == true)
+      {
+        ChanegeColor(true);
+      }else{
+        ChanegeColor(false);
+      }
+    }
+
+    void ChanegeColor(bool select)
+    {
+      if (select == true)
+      {
+        transform.GetChild(6).GetComponent<MeshRenderer>().enabled = true;
+      }else{
+        transform.GetChild(6).GetComponent<MeshRenderer>().enabled = false;
       }
     }
 }

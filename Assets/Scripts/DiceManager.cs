@@ -87,7 +87,7 @@ public class DiceManager : MonoBehaviour
             {
                 // クリックされたダイスを入れる
                 DiceCopy = hit.collider.gameObject;
-                script = hit.collider.gameObject.GetComponent<DicePrefab>();
+                script = DiceCopy.GetComponent<DicePrefab>();
                 script.SpinFlag = true;
             }else 
             {
@@ -110,7 +110,7 @@ public class DiceManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit, 100.0f))
             {
                 DiceCopy = hit.collider.gameObject;
-                script = hit.collider.gameObject.GetComponent<DicePrefab>();
+                script = DiceCopy.GetComponent<DicePrefab>();
                 script.SpinFlag = false;
                 // ダイスを止めた角度を表示
                 Debug.Log("角度"　+  hit.collider.gameObject.transform.localEulerAngles);
@@ -151,6 +151,8 @@ public class DiceManager : MonoBehaviour
         {
             Application.Quit();
         }
+
+        SelectionDise();
     }
     // 指定されたCSVからオブジェクトの座標と角度、拡大率を取得し、それに従ってオブジェクトを配置する関数
     void ReadCSV(List<string[]> TargetList)
@@ -266,5 +268,21 @@ public class DiceManager : MonoBehaviour
                 this.SpinFlag = false;
             }      
         }
+    }
+
+    void SelectionDise()
+    {
+        foreach(GameObject select in Dices)
+        {
+            DicePrefab selectScript ;
+            selectScript = select.GetComponent<DicePrefab>();
+            if (select == DiceCopy)
+            {
+                selectScript.SelectionNow = true;
+            }else{
+                selectScript.SelectionNow = false;
+            }
+        }
+
     }
 }
