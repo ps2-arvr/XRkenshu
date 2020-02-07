@@ -7,10 +7,13 @@ using UnityEditor;
 
 public class DiceManager : MonoBehaviour
 {
+    //CSVReaderWriter読み込み用の変数
+    private CSVReaderWriter CSVScript ;
+    private GameObject CSVReaderWriter;
     // Prefab取得用の変数
     public GameObject DiceCopy ;
     // 初期の状態のPrefabを保存する変数
-    private GameObject DiceOriginal;
+    public GameObject DiceOriginal;
     //　直近でクリックされたオブジェクトを格納する。
     public GameObject GetRayObject;
     public DicePrefab script ;
@@ -21,38 +24,28 @@ public class DiceManager : MonoBehaviour
     // サイコロのPrefabをAssetから取得
     private Vector3 ClickPosition ;
     // 作ったサイコロをすべて入れる配列
-    private GameObject[] Dices ;
+    public GameObject[] Dices ;
     // 配列のオブジェクトからScriptを取り出して入れる変数
     private DicePrefab AllScripts ;
     //Keycodeを入れる
     private string InputKey ; 
-    private List<string[]> SettingList = new List<string[]>(); 
-    // CSVファイル書き出し・読み込み用　ポジション変数
-    private Vector3 SettingPosition = new Vector3();
-    // CSVファイル書き出し・読み込み用　スケール変数
-    private Vector3 SettingRotation ;
-    // CSVファイル書き出し・読み込み用　ローテーション変数
-    private Vector3 SettingScale = new Vector3();
-    // CSVファイルを入れる変数
-    private string ReadFile ;
-    // 変更後のCSVファイルの中身を格納する配列
-    private List<string[]> ReloadingList = new List<string[]>();
-    // 保存先のファイルパス
-    private string SaveUrl =  "/SaveDice.csv" ;
+    //保存先のファイルパス
+    public string SaveUrl ;
     //初期設定のファイルパス
-    private string SettingUrl = Application.streamingAssetsPath + "/Setting.csv";
+    public string SettingUrl = Application.streamingAssetsPath + "/Setting.csv";
+    //コピー先のファイルパス
+    public string CopyUrl;
 
     void Start()
     {   
+        CopyUrl =  Application.streamingAssetsPath + "/SaveDice.csv";
+        SaveUrl =  Application.persistentDataPath + "/SaveDice.csv";
         DiceOriginal = DiceCopy;
-        if (System.IO.File.Exists(Application.persistentDataPath + SaveUrl))
-        {
-            // 前回の保存データが残っている場合削除
-            Debug.Log("既存のセーブデータを消しました");
-            File.Delete(Application.persistentDataPath + SaveUrl);
-        }
-        SettingList = ListMakeCSV(SettingUrl);
-        ReadCSV(SettingList);
+        CSVReaderWriter = GameObject.Find("CSVReaderWriter");
+        CSVScript = CSVReaderWriter.GetComponent<CSVReaderWriter>();
+
+        CSVScript.SaveCSVExists(CopyUrl,true);
+        CSVScript.ListMakeCSV(SettingUrl,Dices);
     }
 
 
@@ -126,26 +119,22 @@ public class DiceManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             // 初期設定CSVを読み込む
-            SettingList = ListMakeCSV(SettingUrl);
-            ReadCSV(SettingList);
+            CSVScript.ListMakeCSV(SettingUrl,Dices);
         // 現在のサイコロの状態を保存する
         }else if (Input.GetKeyDown(KeyCode.E))
         {
-            WriteCSV(Dices);
+            CSVScript.WriteCSV(Dices);
         // 書き出したCSVファイルを読み込み
         }else if (Input.GetKeyDown(KeyCode.R))
         {
             // ファイルが存在するかどうか確認する
-            if (System.IO.File.Exists(Application.persistentDataPath + SaveUrl))
+            if (CSVScript.SaveCSVExists(SaveUrl))
             {
-                ReloadingList = ListMakeCSV(Application.persistentDataPath + SaveUrl);
-                ReadCSV(ReloadingList);
-
+                CSVScript.ListMakeCSV(SaveUrl,Dices);
             }else{
                 // 無かった場合初期設定CSVを読み込む
                 Debug.Log("保存データ　null");
-                SettingList = ListMakeCSV(SettingUrl);
-                ReadCSV(SettingList);
+                CSVScript.ListMakeCSV(SettingUrl,Dices);
             }
         }else if (Input.GetKeyDown(KeyCode.F12))
         {
@@ -154,60 +143,10 @@ public class DiceManager : MonoBehaviour
 
         SelectionDise();
     }
-    // 指定されたCSVからオブジェクトの座標と角度、拡大率を取得し、それに従ってオブジェクトを配置する関数
-    void ReadCSV(List<string[]> TargetList)
+    public void CloneDice(Vector3 position, Vector3 Rotation, Vector3 Scale)
     {
-        //現存するサイコロをすべて削除する
-        if (Dices != null)
-        {
-            foreach(GameObject dice in Dices)
-            {
-                Destroy(dice);
-            }
-        }    
         // DiceCopy内にあるオブジェクト情報を親のPrefabに戻す
         DiceCopy = DiceOriginal ;
-        Debug.Log("リスト内の数：" + TargetList.Count);
-        for (int count = 1 ; count <= (TargetList.Count - 1);count++)
-        {
-            Debug.Log("リストの中身position x：" + TargetList[count][1]);
-            // CSVに入っている座標・角度・拡大率を変数に格納する
-            SettingPosition = new Vector3(float.Parse(TargetList[count][1]),float.Parse(TargetList[count][2]),float.Parse(TargetList[count][3]));
-            SettingRotation = new Vector3(float.Parse(TargetList[count][4]),float.Parse(TargetList[count][5]),float.Parse(TargetList[count][6]));
-            SettingScale = new Vector3(float.Parse(TargetList[count][7]),float.Parse(TargetList[count][8]),float.Parse(TargetList[count][9]));
-
-            CloneDice(SettingPosition,SettingRotation,SettingScale);
-        }
-        TargetList.Clear();
-    }
-    // 現在のゲームオブジェクトの座標・角度・拡大率をCSVファイルに書き込む関数
-    void WriteCSV(GameObject[] DiceList)
-    {
-        string saveCSV = Application.persistentDataPath + SaveUrl ;
-        string writeData = "\"\"," + "x," + "y," + "z," + "x," + "y," + "z," + "x," + "y," + "z" ;
-        foreach (GameObject saveDice in DiceList)
-        {
-            // 現在のサイコロの情報を格納する
-            SettingPosition = saveDice.transform.localPosition;
-            SettingRotation = saveDice.transform.localEulerAngles;
-            SettingScale = saveDice.transform.localScale;
-
-            // 一行につき一つのサイコロを書き込んでいく
-            writeData += "\r\n" +"\"\","+
-                        (SettingPosition.x) + "," + (SettingPosition.y) + "," + (SettingPosition.z) + "," +
-                        (SettingRotation.x) + "," + (SettingRotation.y) + "," + (SettingRotation.z) + "," +
-                        (SettingScale.x) + "," + (SettingScale.y) + "," + (SettingScale.z)  ;
-        }
-        Debug.Log(writeData);
-        Debug.Log(saveCSV);
-        StreamWriter sw;
-        sw = new StreamWriter(saveCSV, false, Encoding.GetEncoding("UTF-8"));
-        sw.WriteLine(writeData);
-        sw.Close();
-    }
-
-    void CloneDice(Vector3 position, Vector3 Rotation, Vector3 Scale)
-    {
          // サイコロのPrefabを生成する
         DiceCopy = Instantiate(DiceCopy,new Vector3(0, 0, 0), Quaternion.identity);
         // サイコロにサイコロ用のタグをつける
@@ -222,30 +161,7 @@ public class DiceManager : MonoBehaviour
         DiceCopy.transform.localEulerAngles = Rotation;
     }
 
-    
-    // 引数でCSVのファイルパスをもらい、CSVを読み込み、内容をリストに格納してリストを返すメソッド
-    List<string[]> ListMakeCSV(string readPath)
-    {
-        List<string[]> makeList = new List<string[]>();
-        // 初期設定の入ったCSVファイルを読み込み
-        //ReadFile = File.ReadAllText(readPath);
-        Encoding enc;
-        enc = Encoding.GetEncoding("UTF-8");
-        string path = readPath;
-        string csvText = File.ReadAllText(path,enc);
-        Debug.Log(path);
-
-        // 渡されたCSVを一行ずつ読み込む
-        StringReader reader = new StringReader(csvText);
-        // 読み込む行がなくなるまでリストに格納を繰り返す
-        while (reader.Peek() != -1)
-        {
-            string line = reader.ReadLine();
-            makeList.Add(line.Split(','));
-        }
-        return makeList;
-    }
-    void AllSpins()
+    private void AllSpins()
     {
         // タグがTagDiceのものをすべて入れる
         if (SpinFlag == false)
@@ -270,7 +186,7 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    void SelectionDise()
+    private void SelectionDise()
     {
         foreach(GameObject select in Dices)
         {
