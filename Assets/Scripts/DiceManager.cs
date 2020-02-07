@@ -38,21 +38,18 @@ public class DiceManager : MonoBehaviour
     // 変更後のCSVファイルの中身を格納する配列
     private List<string[]> ReloadingList = new List<string[]>();
     // 保存先のファイルパス
-    private string SaveUrl = "Assets/StreamingAssets/SaveDice.csv" ;
+    private string SaveUrl =  "/SaveDice.csv" ;
     //初期設定のファイルパス
-    private string SettingUrl = "Assets/StreamingAssets/Setting.csv";
+    private string SettingUrl = Application.streamingAssetsPath + "/Setting.csv";
 
-
-
-    
     void Start()
     {   
         DiceOriginal = DiceCopy;
-        if (System.IO.File.Exists(SaveUrl))
+        if (System.IO.File.Exists(Application.persistentDataPath + SaveUrl))
         {
             // 前回の保存データが残っている場合削除
             Debug.Log("既存のセーブデータを消しました");
-            File.Delete(SaveUrl);
+            File.Delete(Application.persistentDataPath + SaveUrl);
         }
         SettingList = ListMakeCSV(SettingUrl);
         ReadCSV(SettingList);
@@ -139,16 +136,20 @@ public class DiceManager : MonoBehaviour
         }else if (Input.GetKeyDown(KeyCode.R))
         {
             // ファイルが存在するかどうか確認する
-            if (System.IO.File.Exists(SaveUrl))
+            if (System.IO.File.Exists(Application.persistentDataPath + SaveUrl))
             {
-                ReloadingList = ListMakeCSV(SaveUrl);
+                ReloadingList = ListMakeCSV(Application.persistentDataPath + SaveUrl);
                 ReadCSV(ReloadingList);
 
             }else{
                 // 無かった場合初期設定CSVを読み込む
+                Debug.Log("保存データ　null");
                 SettingList = ListMakeCSV(SettingUrl);
                 ReadCSV(SettingList);
             }
+        }else if (Input.GetKeyDown(KeyCode.F12))
+        {
+            Application.Quit();
         }
     }
     // 指定されたCSVからオブジェクトの座標と角度、拡大率を取得し、それに従ってオブジェクトを配置する関数
@@ -164,10 +165,10 @@ public class DiceManager : MonoBehaviour
         }    
         // DiceCopy内にあるオブジェクト情報を親のPrefabに戻す
         DiceCopy = DiceOriginal ;
-        Debug.Log(TargetList.Count);
+        Debug.Log("リスト内の数：" + TargetList.Count);
         for (int count = 1 ; count <= (TargetList.Count - 1);count++)
         {
-            Debug.Log(TargetList[count][1]);
+            Debug.Log("リストの中身position x：" + TargetList[count][1]);
             // CSVに入っている座標・角度・拡大率を変数に格納する
             SettingPosition = new Vector3(float.Parse(TargetList[count][1]),float.Parse(TargetList[count][2]),float.Parse(TargetList[count][3]));
             SettingRotation = new Vector3(float.Parse(TargetList[count][4]),float.Parse(TargetList[count][5]),float.Parse(TargetList[count][6]));
@@ -180,7 +181,7 @@ public class DiceManager : MonoBehaviour
     // 現在のゲームオブジェクトの座標・角度・拡大率をCSVファイルに書き込む関数
     void WriteCSV(GameObject[] DiceList)
     {
-        StreamWriter saveCSV = new StreamWriter(SaveUrl, false, Encoding.GetEncoding("Shift_JIS"));
+        string saveCSV = Application.persistentDataPath + SaveUrl ;
         string writeData = "\"\"," + "x," + "y," + "z," + "x," + "y," + "z," + "x," + "y," + "z" ;
         foreach (GameObject saveDice in DiceList)
         {
@@ -196,8 +197,11 @@ public class DiceManager : MonoBehaviour
                         (SettingScale.x) + "," + (SettingScale.y) + "," + (SettingScale.z)  ;
         }
         Debug.Log(writeData);
-        saveCSV.WriteLine(writeData);
-        saveCSV.Close();
+        Debug.Log(saveCSV);
+        StreamWriter sw;
+        sw = new StreamWriter(saveCSV, false, Encoding.GetEncoding("UTF-8"));
+        sw.WriteLine(writeData);
+        sw.Close();
     }
 
     void CloneDice(Vector3 position, Vector3 Rotation, Vector3 Scale)
@@ -222,9 +226,15 @@ public class DiceManager : MonoBehaviour
     {
         List<string[]> makeList = new List<string[]>();
         // 初期設定の入ったCSVファイルを読み込み
-        ReadFile = File.ReadAllText(readPath);
+        //ReadFile = File.ReadAllText(readPath);
+        Encoding enc;
+        enc = Encoding.GetEncoding("UTF-8");
+        string path = readPath;
+        string csvText = File.ReadAllText(path,enc);
+        Debug.Log(path);
+
         // 渡されたCSVを一行ずつ読み込む
-        StringReader reader = new StringReader(ReadFile);
+        StringReader reader = new StringReader(csvText);
         // 読み込む行がなくなるまでリストに格納を繰り返す
         while (reader.Peek() != -1)
         {
