@@ -619,6 +619,7 @@ MonoBehaviour:
   Dices: []
   SaveUrl: /SaveDice.csv
   SettingUrl: C:/work/mizuno/XRkenshu/Assets/StreamingAssets/Setting.csv
+  CopyUrl: 
 --- !u!4 &1725741976
 Transform:
   m_ObjectHideFlags: 0
@@ -662,8 +663,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d96efd9929d4cc245aaa105abf79e91e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameManager: {fileID: 1725741974}
-  Script: {fileID: 1725741975}
 --- !u!4 &1754964359
 Transform:
   m_ObjectHideFlags: 0

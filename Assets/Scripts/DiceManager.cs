@@ -35,6 +35,8 @@ public class DiceManager : MonoBehaviour
     public string SettingUrl = Application.streamingAssetsPath + "/Setting.csv";
     //コピー先のファイルパス
     public string CopyUrl;
+    //ListMakeCSVから返された配列を格納する変数
+    List<Vector3[]> returnList ;
 
     void Start()
     {   
@@ -45,7 +47,8 @@ public class DiceManager : MonoBehaviour
         CSVScript = CSVReaderWriter.GetComponent<CSVReaderWriter>();
 
         CSVScript.SaveCSVExists(CopyUrl,true);
-        CSVScript.ListMakeCSV(SettingUrl,Dices);
+        returnList = CSVScript.ReadCSV(CSVScript.ListMakeCSV(SettingUrl,Dices));
+        CloneDice(returnList);
     }
 
 
@@ -119,22 +122,25 @@ public class DiceManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             // 初期設定CSVを読み込む
-            CSVScript.ListMakeCSV(SettingUrl,Dices);
+            returnList = CSVScript.ReadCSV(CSVScript.ListMakeCSV(SettingUrl,Dices));
+            CloneDice(returnList);
         // 現在のサイコロの状態を保存する
         }else if (Input.GetKeyDown(KeyCode.E))
         {
-            CSVScript.WriteCSV(Dices);
+            CSVScript.WriteCSV(Dices,SaveUrl,CopyUrl);
         // 書き出したCSVファイルを読み込み
         }else if (Input.GetKeyDown(KeyCode.R))
         {
             // ファイルが存在するかどうか確認する
             if (CSVScript.SaveCSVExists(SaveUrl))
             {
-                CSVScript.ListMakeCSV(SaveUrl,Dices);
+                returnList = CSVScript.ReadCSV(CSVScript.ListMakeCSV(CopyUrl,Dices));
+                CloneDice(returnList);
             }else{
                 // 無かった場合初期設定CSVを読み込む
                 Debug.Log("保存データ　null");
-                CSVScript.ListMakeCSV(SettingUrl,Dices);
+                returnList =  CSVScript.ReadCSV(CSVScript.ListMakeCSV(SettingUrl,Dices));
+                CloneDice(returnList);
             }
         }else if (Input.GetKeyDown(KeyCode.F12))
         {
@@ -143,22 +149,28 @@ public class DiceManager : MonoBehaviour
 
         SelectionDise();
     }
-    public void CloneDice(Vector3 position, Vector3 Rotation, Vector3 Scale)
+    public void CloneDice(List<Vector3[]> list)
     {
-        // DiceCopy内にあるオブジェクト情報を親のPrefabに戻す
-        DiceCopy = DiceOriginal ;
-         // サイコロのPrefabを生成する
-        DiceCopy = Instantiate(DiceCopy,new Vector3(0, 0, 0), Quaternion.identity);
-        // サイコロにサイコロ用のタグをつける
-        DiceCopy.tag = "TagDice";
-        // サイコロの名前
-        DiceCopy.name = "DiceCopy";
-        // サイコロをWorldクラスの子クラスに設定する
-        DiceCopy.transform.parent = World.transform;
-        // 座標・角度・拡大率をそれぞれ入れていく
-        DiceCopy.transform.localScale = Scale;
-        DiceCopy.transform.localPosition = position;
-        DiceCopy.transform.localEulerAngles = Rotation;
+        foreach (Vector3[] List in returnList)
+        {
+            Vector3 position = List[0] ;
+            Vector3 Rotation = List[1] ;
+            Vector3 Scale = List[2] ;
+            // DiceCopy内にあるオブジェクト情報を親のPrefabに戻す
+            DiceCopy = DiceOriginal ;
+            // サイコロのPrefabを生成する
+            DiceCopy = Instantiate(DiceCopy,new Vector3(0, 0, 0), Quaternion.identity);
+            // サイコロにサイコロ用のタグをつける
+            DiceCopy.tag = "TagDice";
+            // サイコロの名前
+            DiceCopy.name = "DiceCopy";
+            // サイコロをWorldクラスの子クラスに設定する
+            DiceCopy.transform.parent = World.transform;
+            // 座標・角度・拡大率をそれぞれ入れていく
+            DiceCopy.transform.localScale = Scale;
+            DiceCopy.transform.localPosition = position;
+            DiceCopy.transform.localEulerAngles = Rotation;
+        }
     }
 
     private void AllSpins()
