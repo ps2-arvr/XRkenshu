@@ -10,10 +10,8 @@ public class BoundManager : MonoBehaviour
 {
     // サイコロのオブジェクトを入れる変数
     public GameObject DicePrefab ;
-
     // クリックした時にオブジェクトに与える力
     public Vector3 GivePower = new Vector3(0.0f, 100.0f, 100.0f);
-
     // マウスのレイを取得する変数
     private Ray GetRay;
     // マウスの当たり判定を取得する変数
@@ -21,8 +19,9 @@ public class BoundManager : MonoBehaviour
     // オブジェクトの物理演算
     private Rigidbody DiceRigid ;
      //カメラ取得
-    GameObject MainCamera ; 
-    GameObject BoundCamera ;   
+    private GameObject MainCamera ; 
+    private GameObject BoundCamera ;   
+    private BoundDicePrefab script ;
     void Start()
     {
         // オブジェクトを取得
@@ -31,6 +30,7 @@ public class BoundManager : MonoBehaviour
         //シーンのメインカメラをアクティブにする
         BoundCamera = GameObject.Find("BoundCamera");
         BoundCamera.SetActive(true);
+        script = DicePrefab.GetComponent<BoundDicePrefab>();
     }
 
     // Update is called once per frame
@@ -46,6 +46,7 @@ public class BoundManager : MonoBehaviour
                 if (objectName == "BoundDice")
                 {
                     DiceRigid.AddForce (GivePower, ForceMode.Impulse);
+                    script.PlaySound();
                 }
             }
         }else if (Input.GetKeyDown(KeyCode.Tab))
