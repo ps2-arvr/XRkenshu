@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Text;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 
 public class DiceManager : MonoBehaviour
 {
@@ -38,6 +39,9 @@ public class DiceManager : MonoBehaviour
     //ListMakeCSVから返された配列を格納する変数
     List<Vector3[]> returnList ;
 
+    //カメラ取得
+    GameObject MainCamera ; 
+    GameObject BoundCamera ;
     void Start()
     {   
         CopyUrl =  Application.streamingAssetsPath + "/SaveDice.csv";
@@ -49,6 +53,9 @@ public class DiceManager : MonoBehaviour
         CSVScript.SaveCSVExists(CopyUrl,true);
         returnList = CSVScript.ReadCSV(CSVScript.ListMakeCSV(SettingUrl,Dices));
         CloneDice(returnList);
+        MainCamera = GameObject.Find("MainCamera");
+        //シーンのメインカメラをアクティブにする
+        MainCamera.SetActive(true);
     }
 
 
@@ -145,6 +152,9 @@ public class DiceManager : MonoBehaviour
         }else if (Input.GetKeyDown(KeyCode.F12))
         {
             Application.Quit();
+        }else if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            ChangeScean();
         }
 
         SelectionDise();
@@ -212,5 +222,11 @@ public class DiceManager : MonoBehaviour
             }
         }
 
+    }
+
+    //シーンの切り替えをする
+    private void ChangeScean()
+    {
+        SceneManager.LoadScene("BoundDiceScene");
     }
 }

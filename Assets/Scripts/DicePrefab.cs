@@ -38,9 +38,8 @@ public class DicePrefab : MonoBehaviour
       if (select == true)
       {
         this.transform.GetChild(6).GetComponent<Renderer>().material.color = new Color32(0, 162, 255 , 180);
-        this.transform.GetChild(6).GetComponent<MeshRenderer>().enabled = true ;
       }else{
-        this.transform.GetChild(6).GetComponent<MeshRenderer>().enabled = false ;
+        this.transform.GetChild(6).GetComponent<Renderer>().material.color = new Color32(0, 162, 255 , 0);
       }
     }
 }
