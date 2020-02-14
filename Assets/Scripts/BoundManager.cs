@@ -55,6 +55,18 @@ public class BoundManager : MonoBehaviour
         }else if (Input.GetKeyDown(KeyCode.F12))
         {
             Application.Quit();
+        }else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            BoundCamera.transform.Translate(-0.1f, 0.0f, 0.0f);
+        }else if (Input.GetKey(KeyCode.DownArrow))
+        {
+            BoundCamera.transform.Translate(0.0f, 0.0f, -0.1f);
+        }else if (Input.GetKey(KeyCode.UpArrow))
+        {
+            BoundCamera.transform.Translate(0.0f, 0.0f, 0.1f);
+        }else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            BoundCamera.transform.Translate(0.1f, 0.0f, 0.0f);
         }
     }
 
