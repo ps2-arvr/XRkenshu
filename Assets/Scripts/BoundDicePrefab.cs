@@ -17,7 +17,7 @@ public class BoundDicePrefab : MonoBehaviour
     {
         
     }
-        //衝突した際に音を流す関数
+    //衝突した際に音を流す関数
     public void OnCollisionEnter(Collision collision)
     {
         PlaySound();
